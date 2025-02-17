@@ -7,7 +7,7 @@ from simulation import Simulation
 WINSIZE = np.array([640, 480])
 NUMBUGS = 50
 NUMFOOD = 200
-BUGSIZE = 10
+BUGSIZE = 3
 FOODSIZE = 3
 HUNGER_RATE = 0.005
 BUG_SIGHT = 1
@@ -17,9 +17,9 @@ HEADLESS = False
 TICK_RATE = 1000
 
 
-def main_loop(headless=False):
+def main_loop(headless=False, population=[]):
     sim = Simulation(NUMBUGS, NUMFOOD, BUGSIZE, FOODSIZE, HUNGER_RATE, BUG_SIGHT, BUG_SEE_BUG, WINSIZE)
-    
+    sim.set_population(population)
     if not headless:
         pg.init()
         screen = pg.display.set_mode(WINSIZE.tolist())
@@ -48,19 +48,18 @@ def main_loop(headless=False):
         
         if sim.is_finished():
             running = False
+            return sim.evolve()
         
         clock.tick(TICK_RATE)
 
-    pg.quit()
-    return pg.time.get_ticks()
 
-def run_one_sim(headless=False):
+def run_one_sim(headless=False, population=[]):
     """Runs a single simulation instance."""
-    ticks = main_loop(headless)
-    print(f'Ticks: {ticks}')
+    return main_loop(headless, population)
 
 
 
+population = []
 for i in range(NUMBER_OF_GENERATIONS):
     print(f"Generation {i}")
-    run_one_sim(headless=HEADLESS)
+    population = run_one_sim(headless=HEADLESS, population=population)

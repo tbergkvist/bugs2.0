@@ -6,9 +6,9 @@ class Brain(nn.Module):
     def __init__(self, inputsize):
         super().__init__()
         self.model = nn.Sequential(
-            nn.Linear(inputsize, 4),
+            nn.Linear(inputsize, 10),
             nn.Sigmoid(),
-            nn.Linear(4, 2),
+            nn.Linear(10, 2),
             nn.Sigmoid()
         )
 

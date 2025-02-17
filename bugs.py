@@ -48,7 +48,7 @@ def main_loop(headless=False, population=[]):
         
         if sim.is_finished():
             running = False
-            return sim.evolve()
+            return sim.evolve(), sim.get_highscore()
         
         clock.tick(TICK_RATE)
 
@@ -59,7 +59,16 @@ def run_one_sim(headless=False, population=[]):
 
 
 
+
 population = []
+old_highscore = 0
+highscore = 0
 for i in range(NUMBER_OF_GENERATIONS):
     print(f"Generation {i}")
-    population = run_one_sim(headless=HEADLESS, population=population)
+    population, highscore = run_one_sim(headless=HEADLESS, population=population)
+    if highscore > old_highscore:
+        print("New highscore!")
+        old_highscore = highscore
+    else:
+        print("Bad generation.")
+    

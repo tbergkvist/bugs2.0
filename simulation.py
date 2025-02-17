@@ -2,6 +2,7 @@ import numpy as np
 from bug import Bug
 from food import Food
 from brain import Brain
+import torch
 
 
 class Simulation:
@@ -75,9 +76,10 @@ class Simulation:
     def evaluate_bugs(self):
         best_bugs = sorted(self.bugsave, key=lambda x: x.score, reverse=True)
         print("Best score: ", best_bugs[0].score)
-        return best_bugs[:len(best_bugs) // 2]
+        return best_bugs[:len(best_bugs) // 4]
 
-    def crossover(self, parent1, parent2):
+
+    def crossover(self, parent1, parent2, mutation_rate=0.01, mutation_strength=0.05):
         parent1_weights = parent1.brain.state_dict()
         parent2_weights = parent2.brain.state_dict()
 
@@ -87,6 +89,10 @@ class Simulation:
         for key in parent1_weights:
             child_weights[key] = (parent1_weights[key] + parent2_weights[key]) / 2
 
+            if np.random.rand() < mutation_rate:
+                mutation = torch.randn_like(child_weights[key]) * mutation_strength
+                child_weights[key] += mutation
+
         child_brain.load_state_dict(child_weights)
 
         child = Bug(self.random_position(), self.bugsize, self.bugsight)
@@ -94,7 +100,7 @@ class Simulation:
 
         return child
 
-    def evolve(self):
+    def evolve(self, best_threshold=2):
         print("Evolving!")
         best_bugs = self.evaluate_bugs()
 
@@ -103,9 +109,9 @@ class Simulation:
             if i + 1 < len(best_bugs):
                 parent1 = best_bugs[i]
                 parent2 = best_bugs[i + 1]
-                child1 = self.crossover(parent1, parent2)
-                child2 = self.crossover(parent1, parent2)
-                new_generation.extend([child1, child2])
+                for _ in range(best_threshold):
+                    child = self.crossover(parent1, parent2)
+                    new_generation.append(child)
 
         return new_generation
 
@@ -114,3 +120,6 @@ class Simulation:
             self.bugs = population
             self.bugsave = self.bugs.copy()
             print("Using saved population!")
+
+    def get_highscore(self):
+        return self.evaluate_bugs()[0].score
